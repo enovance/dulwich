@@ -277,16 +277,19 @@ class SwiftConnector(object):
         headers = {'X-Auth-User': self.user,
                    'X-Auth-Key': self.password}
         prefix_uri = urlparse(self.auth_url).path
+
         ret = auth_httpclient.request('GET',
                                       prefix_uri,
                                       headers=headers)
 
-        if ret.status_code != 200:
-            raise SwiftException('AUTH v1.0 request failed on %s' +
-                                 ' with error code %s (%s)'
-                                 % (ret.status_code,
-                                    str(auth_httpclient.get_base_url()) +
+        # Should do something with redirections (301 in my case)
+
+        if ret.status_code != 200 and ret.status_code != 204:
+            raise SwiftException('AUTH v1.0 request failed on ' +
+                                 '%s with error code %s (%s)'
+                                 % (str(auth_httpclient.get_base_url()) +
                                     prefix_uri,
+                                    ret.status_code,
                                     str(ret.items())))
         storage_url = ret['X-Storage-Url']
         token = ret['X-Auth-Token']
